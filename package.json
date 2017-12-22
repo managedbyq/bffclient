@@ -1,0 +1,23 @@
+{
+  "name": "mbq.bffclient",
+  "version": "0.0.1",
+  "description": "Let's make it easy to connect a BFF with a service!",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/managedbyq/mbq.bffclient.git"
+  },
+  "author": "Managed by Q <engineering-admin@managedbyq.com> (https://managedbyq.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/managedbyq/mbq.bffclient/issues"
+  },
+  "homepage": "https://github.com/managedbyq/mbq.bffclient#readme",
+  "dependencies": {
+    "redis": "^2.8.0",
+    "superagent": "^3.8.2"
+  }
+}
