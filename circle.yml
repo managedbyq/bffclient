@@ -1,0 +1,24 @@
+---
+machine:
+  node:
+    version: 8.8.1
+
+general:
+  artifacts:
+    - "npm-debug.log"
+
+dependencies:
+  pre:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+
+test:
+  override:
+    - npm run lint
+    - npm run test
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - npm run publish
+      - .circle/tag_release.sh
