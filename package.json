@@ -4,7 +4,9 @@
   "description": "Let's make it easy to connect a BFF with a service!",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./**/**.spec.js"
+    "test": "mocha ./**/**.spec.js",
+    "lint": "./node_modules/.bin/eslint \"./**/*.js\"",
+    "publish": "./node_modules/.bin/publish"
   },
   "repository": {
     "type": "git",
