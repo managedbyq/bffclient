@@ -97,7 +97,7 @@ const factory = new ServiceClientFactory();
 
 factory.stores = {
   RedisTokenStore,
-  FlatFileTokenStore
-}
+  FlatFileTokenStore,
+};
 
 module.exports = factory;
