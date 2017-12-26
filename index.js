@@ -68,10 +68,10 @@ class ServiceClientFactory {
   }
 
   init({
-    auth0Domain = '',
-    auth0Client = '',
-    auth0Secret = '',
-    tokenStore = null,
+    auth0Domain,
+    auth0Client,
+    auth0Secret,
+    tokenStore,
   }) {
     this.initialized = true;
     this.tokenManager = new TokenManager({
@@ -82,14 +82,14 @@ class ServiceClientFactory {
     });
   }
 
-  createServiceClient(key, url, audience) {
+  createServiceClient(serviceName, url, audience) {
     if (!this.initialized) {
       throw new Error('Cannot create client in uninitialized ServiceClientFactory');
     }
 
-    this.tokenManager.registerClient(key, audience);
+    this.tokenManager.registerClient(serviceName, audience);
 
-    return new ServiceClient(key, url, this.tokenManager);
+    return new ServiceClient(serviceName, url, this.tokenManager);
   }
 }
 

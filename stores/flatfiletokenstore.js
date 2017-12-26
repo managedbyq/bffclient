@@ -5,29 +5,29 @@ class FlatFileTokenStore {
     this.filePath = filePath;
 
     try {
-      this.keysCache = JSON.parse(fs.readFileSync(filePath));
-      if (!this.keysCache) {
-        this.keysCache = {};
+      this.tokenCache = JSON.parse(fs.readFileSync(filePath));
+      if (!this.tokenCache) {
+        this.tokenCache = {};
       }
     } catch (e) {
-      this.keysCache = {};
+      this.tokenCache = {};
     }
   }
 
-  async storeToken(key, value) {
-    this.keysCache[key] = value;
+  async storeToken(serviceName, value) {
+    this.tokenCache[serviceName] = value;
     return this.saveTokens();
   }
 
-  async getToken(key) {
+  async getToken(serviceName) {
     return new Promise((resolve) => {
-      resolve(this.keysCache[key]);
+      resolve(this.tokenCache[serviceName]);
     });
   }
 
   saveTokens() {
     return new Promise((resolve, reject) => {
-      fs.writeFile(this.filePath, JSON.stringify(this.keysCache), (err) => {
+      fs.writeFile(this.filePath, JSON.stringify(this.tokenCache), (err) => {
         if (err) {
           reject(err);
         }
