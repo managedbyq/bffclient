@@ -8,6 +8,7 @@ const RedisTokenStore = require('./stores/redistokenstore');
 
 class ServiceClient {
   constructor(key, url, tokenManager) {
+    // Do not create -- use a ServiceClientFactory
     this.key = key;
     this.tokenManager = tokenManager;
     this.url = url;
@@ -41,23 +42,23 @@ class ServiceClient {
       .timeout(5000);
   }
 
-  get(path, options) {
+  get(path, options = {}) {
     return this.request('GET', path, options);
   }
 
-  post(path, options) {
+  post(path, options = {}) {
     return this.request('POST', path, options);
   }
 
-  patch(path, options) {
+  patch(path, options = {}) {
     return this.request('PATCH', path, options);
   }
 
-  put(path, options) {
+  put(path, options = {}) {
     return this.request('PUT', path, options);
   }
 
-  delete(path, options) {
+  delete(path, options = {}) {
     return this.request('DELETE', path, options);
   }
 }
@@ -82,14 +83,14 @@ class ServiceClientFactory {
     });
   }
 
-  createServiceClient(serviceName, url, audience) {
+  async createServiceClient(serviceName, url, audience, tokenRefreshRate) {
     if (!this.initialized) {
-      throw new Error('Cannot create client in uninitialized ServiceClientFactory');
+      return Promise.reject(new Error('Cannot create client in uninitialized ServiceClientFactory'));
     }
 
-    this.tokenManager.registerClient(serviceName, audience);
+    await this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
-    return new ServiceClient(serviceName, url, this.tokenManager);
+    return Promise.resolve(new ServiceClient(serviceName, url, this.tokenManager));
   }
 }
 
