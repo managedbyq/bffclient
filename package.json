@@ -1,5 +1,5 @@
 {
-  "name": "mbq.bffclient",
+  "name": "@mbq/bffclient",
   "version": "0.0.1",
   "description": "Let's make it easy to connect a BFF with a service!",
   "main": "index.js",
@@ -30,6 +30,7 @@
     "fakeredis": "^2.0.0",
     "mocha": "^4.0.1",
     "mock-fs": "^4.4.2",
-    "nock": "^9.1.5"
+    "nock": "^9.1.5",
+    "publish": "^0.6.0"
   }
 }
