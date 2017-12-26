@@ -14,17 +14,17 @@ class TokenManager {
     this.audiences = {};
   }
 
-  registerClient(key, audience) {
-    this.audiences[key] = audience;
-    this.refreshAccessToken(key);
+  registerClient(serviceName, audience) {
+    this.audiences[serviceName] = audience;
+    this.refreshAccessToken(serviceName);
   }
 
-  async getToken(key) {
+  async getToken(serviceName) {
     try {
-      let token = await this.tokenStore.getToken(`${key}-access-token`);
+      let token = await this.tokenStore.getToken(`${serviceName}-access-token`);
 
       if (!token) {
-        token = await this.refreshAccessToken(key);
+        token = await this.refreshAccessToken(serviceName);
       }
 
       return token;
@@ -33,7 +33,7 @@ class TokenManager {
     }
   }
 
-  refreshAccessToken(key) {
+  refreshAccessToken(serviceName) {
     return new Promise((resolve, reject) => {
       superagent
         .post(`https://${this.auth0Domain}/oauth/token`)
@@ -42,13 +42,13 @@ class TokenManager {
           grant_type: 'client_credentials',
           client_id: this.auth0Client,
           client_secret: this.auth0Secret,
-          audience: this.audiences[key],
+          audience: this.audiences[serviceName],
         })
         .then(res => res.body.access_token)
         .catch(err => reject(err))
         .then((accessToken) => {
           if (accessToken) {
-            this.tokenStore.storeToken(`${key}-access-token`, accessToken)
+            this.tokenStore.storeToken(`${serviceName}-access-token`, accessToken)
               .catch(err => reject(err))
               .then(() => resolve(accessToken));
           } else {
