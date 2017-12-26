@@ -17,7 +17,7 @@ describe('ServiceClientFactory', () => {
       'http://example.com',
       'audience_string',
     ).catch((err) => {
-      assert.equal(err.message, 'Cannot create client in uninitialized ServiceClientFactory');
+      assert.strictEqual(err.message, 'Cannot create client in uninitialized ServiceClientFactory');
       done();
     });
   });

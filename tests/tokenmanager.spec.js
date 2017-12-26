@@ -31,7 +31,7 @@ describe('TokenManager', () => {
     const tm = new TokenManager(TEST_ARGS);
     await tm.registerClient('service_name', 'service_audience');
     const token = await tm.getToken('service_name');
-    assert.equal(token, 'abc123');
+    assert.strictEqual(token, 'abc123');
     tm.removeClient('service_name');
     nock.isDone();
   });
@@ -75,7 +75,7 @@ describe('TokenManager', () => {
     await tm.registerClient('auto_service', 'service_audience', 10);
 
     const token1 = await tm.getToken('auto_service');
-    assert.equal(token1, 'efg456');
+    assert.strictEqual(token1, 'efg456');
 
     const asyncNock = () => new Promise(resolve =>
       nock('https://example.com')
@@ -99,6 +99,6 @@ describe('TokenManager', () => {
     tm.removeClient('auto_service');
 
     const token2 = await tm.getToken('auto_service');
-    assert.equal(token2, 'efg456');
+    assert.strictEqual(token2, 'efg456');
   });
 });

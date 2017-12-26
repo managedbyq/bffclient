@@ -15,7 +15,7 @@ describe('FlatFileTokenStore', () => {
     const ffts = new FlatFileTokenStore(PATH);
     await ffts.storeToken('key', 'TOKEN_VALUE');
     const token = await ffts.getToken('key');
-    assert.equal(token, 'TOKEN_VALUE');
+    assert.strictEqual(token, 'TOKEN_VALUE');
 
     assert.include(fs.readFileSync(PATH).toString(), 'TOKEN_VALUE');
 
