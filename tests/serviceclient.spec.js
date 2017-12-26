@@ -9,6 +9,12 @@ describe('ServiceClientFactory', () => {
   beforeEach(() => {
     // eslint-disable-next-line global-require
     ServiceClientFactory = require('../index');
+    nock.disableNetConnect();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   it('should not create a ServiceClient when uninitialized', (done) => {

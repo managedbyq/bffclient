@@ -11,9 +11,16 @@ const TEST_ARGS = {
   tokenStore: new MockTokenStore(),
 };
 
-const sleep = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
-
 describe('TokenManager', () => {
+  beforeEach(() => {
+    nock.disableNetConnect();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
+  });
+
   it('should create a new tokenmanager when invoked', () => {
     const tm = new TokenManager(TEST_ARGS);
     assert.isOk(tm);
