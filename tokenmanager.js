@@ -12,21 +12,27 @@ class TokenManager {
     this.auth0Secret = auth0Secret;
     this.tokenStore = tokenStore;
     this.audiences = {};
+
+    this.intervals = {};
   }
 
-  async registerClient(serviceName, audience) {
+  async registerClient(serviceName, audience, refreshRate) {
     this.audiences[serviceName] = audience;
-    await this.refreshAccessToken(serviceName);
+    await this.refreshAccessToken(serviceName, refreshRate);
+
+    if (refreshRate) {
+      this.intervals[serviceName] = setInterval(() => {
+        this.refreshAccessToken(serviceName, refreshRate);
+      }, refreshRate);
+    }
   }
 
   async getToken(serviceName) {
     try {
       let token = await this.tokenStore.getToken(`${serviceName}-access-token`);
-
       if (!token) {
         token = await this.refreshAccessToken(serviceName);
       }
-
       return token;
     } catch (e) {
       return Promise.reject(e);
@@ -43,13 +49,22 @@ class TokenManager {
         client_secret: this.auth0Secret,
         audience: this.audiences[serviceName],
       });
+
     const accessToken = response.body.access_token;
+
     if (accessToken) {
       await this.tokenStore.storeToken(`${serviceName}-access-token`, accessToken);
     } else {
       throw new Error('Access token is undefined');
     }
+
     return accessToken;
+  }
+
+  removeClient(serviceName) {
+    delete this.audiences[serviceName];
+    clearTimeout(this.intervals[serviceName]);
+    delete this.intervals[serviceName];
   }
 }
 
