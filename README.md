@@ -8,9 +8,9 @@ In an initialization file (e.g. `app.js`):
 const BffClientFactory = require('mbq.bffclient');
 
 // either
-store = new BffClientFactory.RedisTokenStore(process.env.REDIS_STORE_URL)
+store = new BffClientFactory.stores.RedisTokenStore(process.env.REDIS_STORE_URL)
 // or
-store = new BffClientFactory.FlatFileTokenStore(process.env.TOKEN_FILE_PATH)
+store = new BffClientFactory.stores.FlatFileTokenStore(process.env.TOKEN_FILE_PATH)
 
 BffClientFactory.init({
   auth0Domain: process.env.AUTH0_DOMAIN,
