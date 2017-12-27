@@ -63,7 +63,7 @@ const myService = require('./services/myservice.js');
 try {
   const res = await myService.getWidgets(1);
   handleWidget(res.data.widgets[0]);
-catch (e) {
+} catch (e) {
   handleError(e);
 }
 ```
