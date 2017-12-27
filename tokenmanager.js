@@ -1,4 +1,4 @@
-const superagent = require('superagent');
+const axios = require('axios');
 
 class TokenManager {
   constructor({
@@ -39,17 +39,19 @@ class TokenManager {
   }
 
   async refreshAccessToken(serviceName) {
-    const response = await superagent
-      .post(`https://${this.auth0Domain}/oauth/token`)
-      .set('content-type', 'application/json')
-      .send({
+    const response = await axios({
+      url: `https://${this.auth0Domain}/oauth/token`,
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      data: {
         grant_type: 'client_credentials',
         client_id: this.auth0Client,
         client_secret: this.auth0Secret,
         audience: this.audiences[serviceName],
-      });
+      },
+    });
 
-    const accessToken = response.body.access_token;
+    const accessToken = response.data.access_token;
 
     if (accessToken) {
       await this.tokenStore.storeToken(`${serviceName}-access-token`, accessToken);

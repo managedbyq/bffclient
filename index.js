@@ -1,4 +1,4 @@
-const superagent = require('superagent');
+const axios = require('axios');
 
 const TokenManager = require('./tokenmanager');
 
@@ -25,7 +25,9 @@ class ServiceClient {
     }
   }
 
-  async request(method, path, { headers = {}, query = {}, body = {} }) {
+  async request(method, path, {
+    headers = {}, params = {}, data = {}, timeout = 5000,
+  }) {
     const authHeaders = await this.getAuthHeaders();
     headers = {
       ...this.defaultHeaders,
@@ -35,11 +37,9 @@ class ServiceClient {
 
     const url = this.url + path;
 
-    return superagent(method, url)
-      .set(headers)
-      .query(query)
-      .send(body)
-      .timeout(5000);
+    return axios({
+      url, method, headers, params, data, timeout,
+    });
   }
 
   get(path, options = {}) {

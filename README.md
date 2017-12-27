@@ -60,10 +60,12 @@ To call:
 ```javascript
 const myService = require('./services/myservice.js');
 
-myService
-    .getWidgets(1)
-    .then(res => handleRes(res))
-    .catch(err => handleErr(err));
+try {
+  const res = await myService.getWidgets(1);
+  handleWidget(res.data.widgets[0]);
+} catch (e) {
+  handleError(e);
+}
 ```
 
 Handles the following methods:
@@ -76,6 +78,8 @@ Handles the following methods:
 
 Where options takes:
 
- - `query` Query String Params ("GET" params)
- - `body` Request Body ("POST" params)
+ - `params` Query String Params ("GET" params)
+ - `data` Request Body ("POST" params)
  - `headers` Headers (will override all others)
+
+ The result of these methods will be a [promise-wrapped Axios response](https://www.npmjs.com/package/axios#response-schema).

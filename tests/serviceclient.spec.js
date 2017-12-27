@@ -71,8 +71,8 @@ describe('ServiceClient', () => {
     const response = await serviceClient.get(
       '/get',
       {
-        query: { query_string: 'abc' },
-        body: { body_content: 'xyz' },
+        params: { query_string: 'abc' },
+        data: { body_content: 'xyz' },
         headers: { header_content: '123' },
       },
     );
@@ -89,8 +89,8 @@ describe('ServiceClient', () => {
     const response = await serviceClient.post(
       '/post',
       {
-        query: { query_string: 'abc' },
-        body: { body_content: 'xyz' },
+        params: { query_string: 'abc' },
+        data: { body_content: 'xyz' },
         headers: { header_content: '123' },
       },
     );
@@ -107,8 +107,8 @@ describe('ServiceClient', () => {
     const response = await serviceClient.put(
       '/put',
       {
-        query: { query_string: 'abc' },
-        body: { body_content: 'xyz' },
+        params: { query_string: 'abc' },
+        data: { body_content: 'xyz' },
         headers: { header_content: '123' },
       },
     );
@@ -125,8 +125,8 @@ describe('ServiceClient', () => {
     const response = await serviceClient.patch(
       '/patch',
       {
-        query: { query_string: 'abc' },
-        body: { body_content: 'xyz' },
+        params: { query_string: 'abc' },
+        data: { body_content: 'xyz' },
         headers: { header_content: '123' },
       },
     );
@@ -143,8 +143,8 @@ describe('ServiceClient', () => {
     const response = await serviceClient.delete(
       '/delete',
       {
-        query: { query_string: 'abc' },
-        body: { body_content: 'xyz' },
+        params: { query_string: 'abc' },
+        data: { body_content: 'xyz' },
         headers: { header_content: '123' },
       },
     );
