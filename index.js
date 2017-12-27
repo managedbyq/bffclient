@@ -83,14 +83,14 @@ class ServiceClientFactory {
     });
   }
 
-  async createServiceClient(serviceName, url, audience, tokenRefreshRate) {
+  createServiceClient(serviceName, url, audience, tokenRefreshRate) {
     if (!this.initialized) {
-      return Promise.reject(new Error('Cannot create client in uninitialized ServiceClientFactory'));
+      throw new Error('Cannot create client in uninitialized ServiceClientFactory');
     }
 
-    await this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
+    this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
-    return Promise.resolve(new ServiceClient(serviceName, url, this.tokenManager));
+    return new ServiceClient(serviceName, url, this.tokenManager);
   }
 }
 

@@ -40,7 +40,7 @@ describe('TokenManager', () => {
     const token = await tm.getToken('service_name');
     assert.strictEqual(token, 'abc123');
     tm.removeClient('service_name');
-    nock.isDone();
+    assert.isTrue(nock.isDone());
   });
 
   it('should send the correct headers to auth0', async () => {
@@ -60,7 +60,7 @@ describe('TokenManager', () => {
     const tm = new TokenManager(TEST_ARGS);
     await tm.registerClient('service_name', 'service_audience');
     tm.removeClient('service_name');
-    nock.isDone();
+    assert.isTrue(nock.isDone());
   });
 
   it('should refresh tokens automatically', async () => {

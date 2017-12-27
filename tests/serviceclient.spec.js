@@ -28,32 +28,19 @@ describe('ServiceClientFactory', () => {
     });
   });
   it('should create a ServiceClient when initialized', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID_INIT',
-          client_secret: 'TEST_CLIENT_SECRET_INIT',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'abc123',
-      });
     ServiceClientFactory.init({
       auth0Domain: 'auth0.example.com',
       auth0Client: 'TEST_CLIENT_ID_INIT',
       auth0Secret: 'TEST_CLIENT_SECRET_INIT',
       tokenStore: new MockTokenStore(),
     });
-    const sc = await ServiceClientFactory.createServiceClient(
+    const sc = ServiceClientFactory.createServiceClient(
       'initialized_service_client_factory',
       'http://example.com',
       'audience_string',
     );
     assert.isOk(sc);
-    nock.isDone();
+    assert.isTrue(nock.isDone());
   });
 });
 
@@ -62,31 +49,17 @@ describe('ServiceClient', () => {
   before(async () => {
     // eslint-disable-next-line global-require
     const ServiceClientFactory = require('../index');
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     ServiceClientFactory.init({
       auth0Domain: 'auth0.example.com',
       auth0Client: 'TEST_CLIENT_ID',
       auth0Secret: 'TEST_CLIENT_SECRET',
       tokenStore: new MockTokenStore(),
     });
-    serviceClient = await ServiceClientFactory.createServiceClient(
+    serviceClient = ServiceClientFactory.createServiceClient(
       'service_client',
       'https://example.com',
       'audience_string',
     );
-    nock.isDone();
   });
 
   it('should be able to GET', async () => {
@@ -103,7 +76,8 @@ describe('ServiceClient', () => {
         headers: { header_content: '123' },
       },
     );
-    assert.isTrue(response.body.ok);
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
   });
 
   it('should be able to POST', async () => {
@@ -120,7 +94,8 @@ describe('ServiceClient', () => {
         headers: { header_content: '123' },
       },
     );
-    assert.isTrue(response.body.ok);
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
   });
 
   it('should be able to PUT', async () => {
@@ -137,7 +112,8 @@ describe('ServiceClient', () => {
         headers: { header_content: '123' },
       },
     );
-    assert.isTrue(response.body.ok);
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
   });
 
   it('should be able to PATCH', async () => {
@@ -154,7 +130,8 @@ describe('ServiceClient', () => {
         headers: { header_content: '123' },
       },
     );
-    assert.isTrue(response.body.ok);
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
   });
 
   it('should be able to DELETE', async () => {
@@ -171,6 +148,7 @@ describe('ServiceClient', () => {
         headers: { header_content: '123' },
       },
     );
-    assert.isTrue(response.body.ok);
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
   });
 });

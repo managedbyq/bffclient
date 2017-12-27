@@ -16,9 +16,8 @@ class TokenManager {
     this.intervals = {};
   }
 
-  async registerClient(serviceName, audience, refreshRate) {
+  registerClient(serviceName, audience, refreshRate) {
     this.audiences[serviceName] = audience;
-    await this.refreshAccessToken(serviceName, refreshRate);
 
     if (refreshRate) {
       this.intervals[serviceName] = setInterval(() => {
