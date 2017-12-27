@@ -17,15 +17,12 @@ describe('ServiceClientFactory', () => {
     nock.enableNetConnect();
   });
 
-  it('should not create a ServiceClient when uninitialized', (done) => {
-    ServiceClientFactory.createServiceClient(
+  it('should not create a ServiceClient when uninitialized', () => {
+    assert.throws(() => ServiceClientFactory.createServiceClient(
       'uninitialized_service_client_factory',
       'http://example.com',
       'audience_string',
-    ).catch((err) => {
-      assert.strictEqual(err.message, 'Cannot create client in uninitialized ServiceClientFactory');
-      done();
-    });
+    ), 'Cannot create client in uninitialized ServiceClientFactory');
   });
   it('should create a ServiceClient when initialized', async () => {
     ServiceClientFactory.init({
@@ -46,7 +43,7 @@ describe('ServiceClientFactory', () => {
 
 describe('ServiceClient', () => {
   let serviceClient;
-  before(async () => {
+  beforeEach(async () => {
     // eslint-disable-next-line global-require
     const ServiceClientFactory = require('../index');
     ServiceClientFactory.init({
@@ -63,6 +60,19 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to GET', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
     nock('https://example.com')
       .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
       .matchHeader('header_content', val => val === '123')
@@ -81,6 +91,19 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to POST', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
     nock('https://example.com')
       .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
       .matchHeader('header_content', val => val === '123')
@@ -99,6 +122,19 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to PUT', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
     nock('https://example.com')
       .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
       .matchHeader('header_content', val => val === '123')
@@ -117,6 +153,19 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to PATCH', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
     nock('https://example.com')
       .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
       .matchHeader('header_content', val => val === '123')
@@ -135,6 +184,19 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to DELETE', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
     nock('https://example.com')
       .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
       .matchHeader('header_content', val => val === '123')

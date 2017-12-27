@@ -43,26 +43,6 @@ describe('TokenManager', () => {
     assert.isTrue(nock.isDone());
   });
 
-  it('should send the correct headers to auth0', async () => {
-    nock('https://example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'service_audience',
-        },
-      )
-      .reply(200, {
-        access_token: 'abc123',
-      });
-    const tm = new TokenManager(TEST_ARGS);
-    await tm.registerClient('service_name', 'service_audience');
-    tm.removeClient('service_name');
-    assert.isTrue(nock.isDone());
-  });
-
   it('should refresh tokens automatically', async () => {
     nock('https://example.com')
       .post(
@@ -79,7 +59,7 @@ describe('TokenManager', () => {
       });
 
     const tm = new TokenManager(TEST_ARGS);
-    await tm.registerClient('auto_service', 'service_audience', 10);
+    tm.registerClient('auto_service', 'service_audience', 10);
 
     const token1 = await tm.getToken('auto_service');
     assert.strictEqual(token1, 'efg456');
@@ -107,5 +87,6 @@ describe('TokenManager', () => {
 
     const token2 = await tm.getToken('auto_service');
     assert.strictEqual(token2, 'efg456');
+    assert.isTrue(nock.isDone());
   });
 });
