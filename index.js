@@ -25,20 +25,18 @@ class ServiceClient {
     }
   }
 
-  async request(method, path, {
-    headers = {}, params = {}, data = {}, timeout = 5000,
-  }) {
+  async request(method, path, options) {
     const authHeaders = await this.getAuthHeaders();
-    headers = {
+    const headers = {
       ...this.defaultHeaders,
       ...authHeaders,
-      ...headers,
+      ...options.headers,
     };
 
     const url = this.url + path;
 
     return axios({
-      url, method, headers, params, data, timeout,
+      url, method, ...options, headers,
     });
   }
 
