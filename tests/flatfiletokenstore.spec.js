@@ -41,7 +41,6 @@ describe('FlatFileTokenStore', () => {
     const newerToken = await ffts2.getToken('key');
     assert.strictEqual(newerToken, 'NEWER_TOKEN_VALUE');
 
-
     mockFs.restore();
   });
 });

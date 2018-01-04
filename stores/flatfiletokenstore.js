@@ -61,7 +61,7 @@ class FlatFileTokenStore {
 
   async getToken(serviceName) {
     const lastModified = await getFileLastModified(this.filePath);
-    if (lastModified > this.fileLastModified) {
+    if (lastModified >= this.fileLastModified) {
       this.fileLastModified = lastModified;
       try {
         this.tokenCache = JSON.parse(await readFileAsync(this.filePath));
