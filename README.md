@@ -137,7 +137,7 @@ Import the services from the index instead of their files directly:
 const myService = require('./services').myService;
 ```
 
-Then, you can write a cron that refreshes the tokens of all services:
+Then, you can write a script that refreshes the tokens of all services, and call that from a cron:
 
 ```javascript
 const BffClientFactory = require('@mbq/bffclient');
