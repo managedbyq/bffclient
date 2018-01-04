@@ -7,16 +7,24 @@ const FlatFileTokenStore = require('./stores/flatfiletokenstore');
 const RedisTokenStore = require('./stores/redistokenstore');
 
 class ServiceClient {
-  constructor(key, url, tokenManager) {
+  constructor(serviceName, url, tokenManager) {
     // Do not create -- use a ServiceClientFactory
-    this.key = key;
+    this.serviceName = serviceName;
     this.tokenManager = tokenManager;
     this.url = url;
   }
 
+  async refreshToken() {
+    try {
+      await this.tokenManager.refreshAccessToken(this.serviceName);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
   async getAuthHeaders() {
     try {
-      const token = await this.tokenManager.getToken(this.key);
+      const token = await this.tokenManager.getToken(this.serviceName);
       return {
         Authorization: `Bearer ${token}`,
       };

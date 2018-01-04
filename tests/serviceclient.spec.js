@@ -244,4 +244,51 @@ describe('ServiceClient', () => {
     assert.isTrue(response.data.ok);
     assert.isTrue(nock.isDone());
   });
+
+  it('should be able to refresh its access tokens', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'access_token_1',
+      });
+
+    nock('https://example.com')
+      .matchHeader('authorization', val => val === 'Bearer access_token_1')
+      .get('/token_test')
+      .reply(200, { ok: true });
+
+    await serviceClient.get('/token_test');
+
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'access_token_2',
+      });
+
+    await serviceClient.refreshToken();
+
+    nock('https://example.com')
+      .matchHeader('authorization', val => val === 'Bearer access_token_2')
+      .get('/token_test_2')
+      .reply(200, { ok: true });
+
+    await serviceClient.get('/token_test_2');
+    assert.isTrue(nock.isDone());
+  });
 });
