@@ -214,6 +214,37 @@ describe('ServiceClient', () => {
     assert.isTrue(nock.isDone());
   });
 
+  it('should allow axios properties to pass through as options', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
+    nock('https://example.com')
+      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
+      .delete('/delete?my_params')
+      .reply(200, { ok: true });
+
+    const response = await serviceClient.delete(
+      '/delete',
+      {
+        paramsSerializer: () => 'my_params',
+        params: { query_string: 'abc' },
+      },
+    );
+
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
+  });
+
   it('should be able to refresh its access tokens', async () => {
     nock('https://auth0.example.com')
       .post(
@@ -258,7 +289,6 @@ describe('ServiceClient', () => {
       .reply(200, { ok: true });
 
     await serviceClient.get('/token_test_2');
-
     assert.isTrue(nock.isDone());
   });
 });
