@@ -22,7 +22,7 @@ describe('FlatFileTokenStore', () => {
     mockFs.restore();
   });
 
-  it('should detect when the file store changes', async() => {
+  it('should detect when the file store changes', async () => {
     mockFs({
       PATH: '',
     });
