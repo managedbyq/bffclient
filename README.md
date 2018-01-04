@@ -58,7 +58,7 @@ module.exports = new MyService(); // see "Refreshing Tokens" section for note
 To call:
 
 ```javascript
-const myService = require('./services/myService');
+const myService = require('./services/myservice');
 
 try {
   const res = await myService.getWidgets(1);
