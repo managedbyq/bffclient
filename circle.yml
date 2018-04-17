@@ -1,24 +1,54 @@
 ---
-machine:
-  node:
-    version: 8.8.1
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.9.1
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+            npm install
+      - run:
+          name: Run Tests
+          command: |
+            npm run lint
+            npm run test
 
-general:
-  artifacts:
-    - "npm-debug.log"
+  deploy:
+    docker:
+      - image: circleci/node:8.9.1
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+            npm install
+      - run:
+          name: Deploy
+          command: |
+            npm run publish
+            .circle/tag_release.sh
 
-dependencies:
-  pre:
-    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+workflows:
+  version: 2
+  tokens-js-workflow:
+    jobs:
+      - build:
+          context: org-global
+      - deploy:
+          context: org-global
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
 
-test:
-  override:
-    - npm run lint
-    - npm run test
-
-deployment:
-  production:
-    branch: master
-    commands:
-      - npm run publish
-      - .circle/tag_release.sh
+experimental:
+  notify:
+    branches:
+      only:
+        - master
