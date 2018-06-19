@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Qs = require('qs');
 
 const TokenManager = require('./tokenmanager');
 
@@ -42,6 +43,10 @@ class ServiceClient {
     };
 
     const url = this.url + path;
+
+    if (!options.paramsSerializer) {
+      options.paramsSerializer = params => Qs.stringify(params, { arrayFormat: 'repeat' });
+    }
 
     return axios({
       url, method, ...options, headers,

@@ -291,4 +291,34 @@ describe('ServiceClient', () => {
     await serviceClient.get('/token_test_2');
     assert.isTrue(nock.isDone());
   });
+
+  it('should repeat multiple query params by default', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
+    nock('https://example.com')
+      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
+      .get('/repeating?foo=1&foo=2')
+      .reply(200, { ok: true });
+
+    const response = await serviceClient.get(
+      '/repeating',
+      {
+        params: { foo: [1, 2] },
+      },
+    );
+
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
+  });
 });
