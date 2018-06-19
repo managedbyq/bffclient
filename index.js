@@ -17,7 +17,7 @@ class ServiceClient {
 
   async refreshToken() {
     try {
-      await this.tokenManager.refreshAccessToken(this.serviceName);
+      return await this.tokenManager.refreshAccessToken(this.serviceName);
     } catch (e) {
       return Promise.reject(e);
     }
