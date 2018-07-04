@@ -39,13 +39,32 @@ describe('ServiceClientFactory', () => {
     assert.isOk(sc);
     assert.isTrue(nock.isDone());
   });
+
+  it('should create a ServiceClient with a correlation ID getter', async () => {
+    ServiceClientFactory.init({
+      auth0Domain: 'auth0.example.com',
+      auth0Client: 'TEST_CLIENT_ID_INIT',
+      auth0Secret: 'TEST_CLIENT_SECRET_INIT',
+      tokenStore: new MockTokenStore(),
+    });
+    const sc = ServiceClientFactory.createServiceClient(
+      'service_with_correlation_id_getter',
+      'http://example.com',
+      'audience_string',
+      0,
+      () => 'correlation_id',
+    );
+    assert.isOk(sc);
+    assert.isTrue(nock.isDone());
+  });
 });
 
 describe('ServiceClient', () => {
   let serviceClient;
+  let ServiceClientFactory;
   beforeEach(async () => {
     // eslint-disable-next-line global-require
-    const ServiceClientFactory = require('../index');
+    ServiceClientFactory = require('../index');
     ServiceClientFactory.init({
       auth0Domain: 'auth0.example.com',
       auth0Client: 'TEST_CLIENT_ID',
@@ -317,6 +336,65 @@ describe('ServiceClient', () => {
         params: { foo: [1, 2] },
       },
     );
+
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
+  });
+
+  it('should not include a correlation id if a getter was not passed to the ServiceClient', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
+    nock('https://example.com', { badHeaders: ['x-correlation-id'] })
+      .get('/test')
+      .reply(200, { ok: true });
+
+    const response = await serviceClient.get('/test');
+
+    assert.isTrue(response.data.ok);
+    assert.isTrue(nock.isDone());
+  });
+
+  it('should include a correlation id if a getter was passed to the ServiceClient', async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
+
+    nock('https://example.com')
+      .matchHeader('x-correlation-id', 'abc123')
+      .get('/test')
+      .reply(200, { ok: true });
+
+    // create a new service client so we can pass the correlation ID getter
+    const correlatingClient = ServiceClientFactory.createServiceClient(
+      'correlating_service_client',
+      'https://example.com',
+      'audience_string',
+      0,
+      () => 'abc123',
+    );
+
+    const response = await correlatingClient.get('/test');
 
     assert.isTrue(response.data.ok);
     assert.isTrue(nock.isDone());

@@ -8,11 +8,12 @@ const FlatFileTokenStore = require('./stores/flatfiletokenstore');
 const RedisTokenStore = require('./stores/redistokenstore');
 
 class ServiceClient {
-  constructor(serviceName, url, tokenManager) {
+  constructor(serviceName, url, tokenManager, getCorrelationId) {
     // Do not create -- use a ServiceClientFactory
     this.serviceName = serviceName;
     this.tokenManager = tokenManager;
     this.url = url;
+    this.getCorrelationId = getCorrelationId;
   }
 
   async refreshToken() {
@@ -36,11 +37,17 @@ class ServiceClient {
 
   async request(method, path, options) {
     const authHeaders = await this.getAuthHeaders();
+    const correlationId = this.getCorrelationId();
+
     const headers = {
       ...this.defaultHeaders,
       ...authHeaders,
       ...options.headers,
     };
+
+    if (correlationId) {
+      headers['x-correlation-id'] = correlationId;
+    }
 
     const url = this.url + path;
 
@@ -94,14 +101,22 @@ class ServiceClientFactory {
     });
   }
 
-  createServiceClient(serviceName, url, audience, tokenRefreshRate) {
+  createServiceClient(
+    serviceName,
+    url,
+    audience,
+    tokenRefreshRate,
+    getCorrelationId,
+  ) {
     if (!this.initialized) {
       throw new Error('Cannot create client in uninitialized ServiceClientFactory');
     }
 
+    getCorrelationId = getCorrelationId || function cid() {};
+
     this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
-    return new ServiceClient(serviceName, url, this.tokenManager);
+    return new ServiceClient(serviceName, url, this.tokenManager, getCorrelationId);
   }
 }
 
