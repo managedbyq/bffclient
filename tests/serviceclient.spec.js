@@ -24,6 +24,7 @@ describe('ServiceClientFactory', () => {
       'audience_string',
     ), 'Cannot create client in uninitialized ServiceClientFactory');
   });
+
   it('should create a ServiceClient when initialized', async () => {
     ServiceClientFactory.init({
       auth0Domain: 'auth0.example.com',
@@ -60,9 +61,24 @@ describe('ServiceClientFactory', () => {
 });
 
 describe('ServiceClient', () => {
-  let serviceClient;
   let ServiceClientFactory;
+  let serviceClient;
+
   beforeEach(async () => {
+    nock('https://auth0.example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: /.*/,
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'audience_string',
+        },
+      )
+      .reply(200, {
+        access_token: 'BEARER_TOKEN',
+      });
+
     // eslint-disable-next-line global-require
     ServiceClientFactory = require('../index');
     ServiceClientFactory.init({
@@ -79,22 +95,9 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to GET', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
-      .matchHeader('header_content', val => val === '123')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
+      .matchHeader('header_content', '123')
       .get('/get?query_string=abc', { body_content: 'xyz' })
       .reply(200, { ok: true });
     const response = await serviceClient.get(
@@ -110,22 +113,9 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to POST', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
-      .matchHeader('header_content', val => val === '123')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
+      .matchHeader('header_content', '123')
       .post('/post?query_string=abc', { body_content: 'xyz' })
       .reply(200, { ok: true });
     const response = await serviceClient.post(
@@ -141,22 +131,9 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to PUT', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
-      .matchHeader('header_content', val => val === '123')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
+      .matchHeader('header_content', '123')
       .put('/put?query_string=abc', { body_content: 'xyz' })
       .reply(200, { ok: true });
     const response = await serviceClient.put(
@@ -172,22 +149,9 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to PATCH', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
-      .matchHeader('header_content', val => val === '123')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
+      .matchHeader('header_content', '123')
       .patch('/patch?query_string=abc', { body_content: 'xyz' })
       .reply(200, { ok: true });
     const response = await serviceClient.patch(
@@ -203,22 +167,9 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to DELETE', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
-      .matchHeader('header_content', val => val === '123')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
+      .matchHeader('header_content', '123')
       .delete('/delete?query_string=abc', { body_content: 'xyz' })
       .reply(200, { ok: true });
     const response = await serviceClient.delete(
@@ -234,21 +185,8 @@ describe('ServiceClient', () => {
   });
 
   it('should allow axios properties to pass through as options', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
       .delete('/delete?my_params')
       .reply(200, { ok: true });
 
@@ -265,22 +203,8 @@ describe('ServiceClient', () => {
   });
 
   it('should be able to refresh its access tokens', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'access_token_1',
-      });
-
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer access_token_1')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
       .get('/token_test')
       .reply(200, { ok: true });
 
@@ -297,13 +221,13 @@ describe('ServiceClient', () => {
         },
       )
       .reply(200, {
-        access_token: 'access_token_2',
+        access_token: 'ANOTHER_TOKEN',
       });
 
     await serviceClient.refreshToken();
 
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer access_token_2')
+      .matchHeader('authorization', 'Bearer ANOTHER_TOKEN')
       .get('/token_test_2')
       .reply(200, { ok: true });
 
@@ -312,21 +236,8 @@ describe('ServiceClient', () => {
   });
 
   it('should repeat multiple query params by default', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com')
-      .matchHeader('authorization', val => val === 'Bearer BEARER_TOKEN')
+      .matchHeader('authorization', 'Bearer BEARER_TOKEN')
       .get('/repeating?foo=1&foo=2')
       .reply(200, { ok: true });
 
@@ -342,19 +253,6 @@ describe('ServiceClient', () => {
   });
 
   it('should not include a correlation id if a getter was not passed to the ServiceClient', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
     nock('https://example.com', { badHeaders: ['x-correlation-id'] })
       .get('/test')
       .reply(200, { ok: true });
@@ -366,20 +264,6 @@ describe('ServiceClient', () => {
   });
 
   it('should include a correlation id if a getter was passed to the ServiceClient', async () => {
-    nock('https://auth0.example.com')
-      .post(
-        '/oauth/token',
-        {
-          grant_type: /.*/,
-          client_id: 'TEST_CLIENT_ID',
-          client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'audience_string',
-        },
-      )
-      .reply(200, {
-        access_token: 'BEARER_TOKEN',
-      });
-
     nock('https://example.com')
       .matchHeader('x-correlation-id', 'abc123')
       .get('/test')
