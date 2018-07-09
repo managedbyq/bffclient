@@ -2,6 +2,7 @@ const axios = require('axios');
 const Qs = require('qs');
 
 const TokenManager = require('./tokenmanager');
+const utils = require('./utils');
 
 // Just for exporting
 const FlatFileTokenStore = require('./stores/flatfiletokenstore');
@@ -112,7 +113,7 @@ class ServiceClientFactory {
       throw new Error('Cannot create client in uninitialized ServiceClientFactory');
     }
 
-    getCorrelationId = getCorrelationId || function cid() {};
+    getCorrelationId = getCorrelationId || utils.noop;
 
     this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
