@@ -1,6 +1,7 @@
 const assert = require('chai').assert;
 const nock = require('nock');
 
+const utils = require('../utils');
 const MockTokenStore = require('./mocktokenstore');
 
 describe('ServiceClientFactory', () => {
@@ -47,20 +48,21 @@ describe('ServiceClientFactory', () => {
       auth0Client: 'TEST_CLIENT_ID_INIT',
       auth0Secret: 'TEST_CLIENT_SECRET_INIT',
       tokenStore: new MockTokenStore(),
+      getCorrelationId: () => 'correlation_id',
     });
     const sc = ServiceClientFactory.createServiceClient(
       'service_with_correlation_id_getter',
       'http://example.com',
       'audience_string',
-      0,
-      () => 'correlation_id',
     );
     assert.isOk(sc);
+    assert.isFunction(sc.getCorrelationId);
+    assert.notStrictEqual(sc.getCorrelationId, utils.noop);
     assert.isTrue(nock.isDone());
   });
 });
 
-describe('ServiceClient', () => {
+describe('ServiceClient without correlation IDs', () => {
   let ServiceClientFactory;
   let serviceClient;
 
@@ -262,21 +264,41 @@ describe('ServiceClient', () => {
     assert.isTrue(response.data.ok);
     assert.isTrue(nock.isDone());
   });
+});
 
-  it('should include a correlation id if a getter was passed to the ServiceClient', async () => {
+describe('ServiceClient with correlation IDs', () => {
+  let correlatingClient;
+
+  beforeEach(async () => {
+    nock('https://auth0.example.com')
+      .post('/oauth/token', {
+        grant_type: /.*/,
+        client_id: 'TEST_CLIENT_ID',
+        client_secret: 'TEST_CLIENT_SECRET',
+        audience: 'audience_string',
+      }).reply(200, { access_token: 'BEARER_TOKEN' });
+
+    // eslint-disable-next-line global-require
+    const ServiceClientFactory = require('../index');
+    ServiceClientFactory.init({
+      auth0Domain: 'auth0.example.com',
+      auth0Client: 'TEST_CLIENT_ID',
+      auth0Secret: 'TEST_CLIENT_SECRET',
+      tokenStore: new MockTokenStore(),
+      getCorrelationId: () => 'abc123',
+    });
+    correlatingClient = ServiceClientFactory.createServiceClient(
+      'service_client',
+      'https://example.com',
+      'audience_string',
+    );
+  });
+
+  it('should include a correlation ID if a getter was passed to the ServiceClient', async () => {
     nock('https://example.com')
       .matchHeader('x-correlation-id', 'abc123')
       .get('/test')
       .reply(200, { ok: true });
-
-    // create a new service client so we can pass the correlation ID getter
-    const correlatingClient = ServiceClientFactory.createServiceClient(
-      'correlating_service_client',
-      'https://example.com',
-      'audience_string',
-      0,
-      () => 'abc123',
-    );
 
     const response = await correlatingClient.get('/test');
 

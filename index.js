@@ -92,6 +92,7 @@ class ServiceClientFactory {
     auth0Client,
     auth0Secret,
     tokenStore,
+    getCorrelationId,
   }) {
     this.initialized = true;
     this.tokenManager = new TokenManager({
@@ -100,24 +101,17 @@ class ServiceClientFactory {
       auth0Client,
       auth0Secret,
     });
+    this.getCorrelationId = getCorrelationId || utils.noop;
   }
 
-  createServiceClient(
-    serviceName,
-    url,
-    audience,
-    tokenRefreshRate,
-    getCorrelationId,
-  ) {
+  createServiceClient(serviceName, url, audience, tokenRefreshRate) {
     if (!this.initialized) {
       throw new Error('Cannot create client in uninitialized ServiceClientFactory');
     }
 
-    getCorrelationId = getCorrelationId || utils.noop;
-
     this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
-    return new ServiceClient(serviceName, url, this.tokenManager, getCorrelationId);
+    return new ServiceClient(serviceName, url, this.tokenManager, this.getCorrelationId);
   }
 }
 
