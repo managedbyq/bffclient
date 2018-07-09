@@ -2,17 +2,19 @@ const axios = require('axios');
 const Qs = require('qs');
 
 const TokenManager = require('./tokenmanager');
+const utils = require('./utils');
 
 // Just for exporting
 const FlatFileTokenStore = require('./stores/flatfiletokenstore');
 const RedisTokenStore = require('./stores/redistokenstore');
 
 class ServiceClient {
-  constructor(serviceName, url, tokenManager) {
+  constructor(serviceName, url, tokenManager, getCorrelationId) {
     // Do not create -- use a ServiceClientFactory
     this.serviceName = serviceName;
     this.tokenManager = tokenManager;
     this.url = url;
+    this.getCorrelationId = getCorrelationId;
   }
 
   async refreshToken() {
@@ -36,11 +38,17 @@ class ServiceClient {
 
   async request(method, path, options) {
     const authHeaders = await this.getAuthHeaders();
+    const correlationId = this.getCorrelationId();
+
     const headers = {
       ...this.defaultHeaders,
       ...authHeaders,
       ...options.headers,
     };
+
+    if (correlationId) {
+      headers['x-correlation-id'] = correlationId;
+    }
 
     const url = this.url + path;
 
@@ -84,6 +92,7 @@ class ServiceClientFactory {
     auth0Client,
     auth0Secret,
     tokenStore,
+    getCorrelationId,
   }) {
     this.initialized = true;
     this.tokenManager = new TokenManager({
@@ -92,6 +101,7 @@ class ServiceClientFactory {
       auth0Client,
       auth0Secret,
     });
+    this.getCorrelationId = getCorrelationId || utils.noop;
   }
 
   createServiceClient(serviceName, url, audience, tokenRefreshRate) {
@@ -101,7 +111,7 @@ class ServiceClientFactory {
 
     this.tokenManager.registerClient(serviceName, audience, tokenRefreshRate);
 
-    return new ServiceClient(serviceName, url, this.tokenManager);
+    return new ServiceClient(serviceName, url, this.tokenManager, this.getCorrelationId);
   }
 }
 
