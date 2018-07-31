@@ -1,11 +1,8 @@
+const Redis = require('ioredis');
+
 class RedisTokenStore {
   constructor(redisUrl, redis) {
-    // Dependency inject Redis for testing
-    if (!redis) {
-      // eslint-disable-next-line global-require
-      redis = require('redis');
-    }
-    this.redisClient = redis.createClient(redisUrl);
+    this.redisClient = redis || new Redis(redisUrl);
   }
 
   async storeToken(key, value) {
