@@ -21,7 +21,6 @@
   "dependencies": {
     "axios": "^0.17.1",
     "ioredis": "^3.2.2",
-    "npm": "^6.2.0",
     "qs": "^6.5.1"
   },
   "devDependencies": {
