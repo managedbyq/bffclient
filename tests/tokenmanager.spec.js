@@ -9,6 +9,7 @@ const TEST_ARGS = {
   auth0Client: 'TEST_CLIENT_ID',
   auth0Secret: 'TEST_CLIENT_SECRET',
   tokenStore: new MockTokenStore(),
+  audiences: { foo: 'bar' },
 };
 
 describe('TokenManager', () => {
@@ -25,68 +26,45 @@ describe('TokenManager', () => {
     const tm = new TokenManager(TEST_ARGS);
     assert.isOk(tm);
   });
-  it('should be able to register a client', async () => {
-    nock('https://example.com')
-      .filteringRequestBody(() => 'x')
-      .post(
-        '/oauth/token',
-        'x',
-      )
-      .reply(200, {
-        access_token: 'abc123',
-      });
-    const tm = new TokenManager(TEST_ARGS);
-    await tm.registerClient('service_name', 'service_audience');
-    const token = await tm.getToken('service_name');
-    assert.strictEqual(token, 'abc123');
-    tm.removeClient('service_name');
-    assert.isTrue(nock.isDone());
-  });
 
-  it('should refresh tokens automatically', async () => {
+  it('should be able to refresh tokens', async () => {
+    const tm = new TokenManager(TEST_ARGS);
     nock('https://example.com')
       .post(
         '/oauth/token',
         {
-          grant_type: /.*/,
+          grant_type: 'client_credentials',
           client_id: 'TEST_CLIENT_ID',
           client_secret: 'TEST_CLIENT_SECRET',
-          audience: 'service_audience',
+          audience: 'bar',
         },
       )
       .reply(200, {
         access_token: 'efg456',
       });
 
-    const tm = new TokenManager(TEST_ARGS);
-    tm.registerClient('auto_service', 'service_audience', 10);
-
-    const token1 = await tm.getToken('auto_service');
+    const token1 = await tm.getToken('foo');
     assert.strictEqual(token1, 'efg456');
+  });
 
-    const asyncNock = () => new Promise(resolve =>
-      nock('https://example.com')
-        .post(
-          '/oauth/token',
-          {
-            grant_type: /.*/,
-            client_id: 'TEST_CLIENT_ID',
-            client_secret: 'TEST_CLIENT_SECRET',
-            audience: 'service_audience',
-          },
-        )
-        .reply(200, () => {
-          resolve();
-          return {
-            access_token: 'ghi789',
-          };
-        }));
+  it('should be able to refresh all tokens', async () => {
+    const tm = new TokenManager(TEST_ARGS);
+    nock('https://example.com')
+      .post(
+        '/oauth/token',
+        {
+          grant_type: 'client_credentials',
+          client_id: 'TEST_CLIENT_ID',
+          client_secret: 'TEST_CLIENT_SECRET',
+          audience: 'bar',
+        },
+      )
+      .reply(200, {
+        access_token: 'efg456',
+      });
 
-    await asyncNock();
-    tm.removeClient('auto_service');
-
-    const token2 = await tm.getToken('auto_service');
-    assert.strictEqual(token2, 'efg456');
-    assert.isTrue(nock.isDone());
+    await tm.refreshAllTokens();
+    const token1 = await tm.getToken('foo');
+    assert.strictEqual(token1, 'efg456');
   });
 });

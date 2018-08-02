@@ -6,31 +6,20 @@ class TokenManager {
     auth0Client,
     auth0Secret,
     tokenStore,
+    audiences,
   }) {
     this.auth0Domain = auth0Domain;
     this.auth0Client = auth0Client;
     this.auth0Secret = auth0Secret;
     this.tokenStore = tokenStore;
-    this.audiences = {};
-
-    this.intervals = {};
+    this.audiences = audiences;
   }
 
-  registerClient(serviceName, audience, refreshRate) {
-    this.audiences[serviceName] = audience;
-
-    if (refreshRate) {
-      this.intervals[serviceName] = setInterval(() => {
-        this.refreshAccessToken(serviceName, refreshRate);
-      }, refreshRate);
-    }
-  }
-
-  async getToken(serviceName) {
+  async getToken(audienceName) {
     try {
-      let token = await this.tokenStore.getToken(`${serviceName}-access-token`);
+      let token = await this.tokenStore.getToken(`${audienceName}-access-token`);
       if (!token) {
-        token = await this.refreshAccessToken(serviceName);
+        token = await this.refreshAccessToken(audienceName);
       }
       return token;
     } catch (e) {
@@ -38,7 +27,7 @@ class TokenManager {
     }
   }
 
-  async refreshAccessToken(serviceName) {
+  async refreshAccessToken(audienceName) {
     const response = await axios({
       url: `https://${this.auth0Domain}/oauth/token`,
       method: 'POST',
@@ -47,14 +36,14 @@ class TokenManager {
         grant_type: 'client_credentials',
         client_id: this.auth0Client,
         client_secret: this.auth0Secret,
-        audience: this.audiences[serviceName],
+        audience: this.audiences[audienceName],
       },
     });
 
     const accessToken = response.data.access_token;
 
     if (accessToken) {
-      await this.tokenStore.storeToken(`${serviceName}-access-token`, accessToken);
+      await this.tokenStore.storeToken(`${audienceName}-access-token`, accessToken);
     } else {
       throw new Error('Access token is undefined');
     }
@@ -62,10 +51,10 @@ class TokenManager {
     return accessToken;
   }
 
-  removeClient(serviceName) {
-    delete this.audiences[serviceName];
-    clearTimeout(this.intervals[serviceName]);
-    delete this.intervals[serviceName];
+  async refreshAllTokens() {
+    Object.keys(this.audiences).forEach(async (name) => {
+      await this.refreshAccessToken(name);
+    });
   }
 }
 
