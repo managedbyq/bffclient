@@ -20,15 +20,15 @@
   "homepage": "https://github.com/managedbyq/mbq.bffclient#readme",
   "dependencies": {
     "axios": "^0.17.1",
-    "ioredis": "^3.2.2",
-    "qs": "^6.5.1"
+    "qs": "^6.5.1",
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "eslint": "^4.14.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
-    "ioredis-mock": "^3.12.0",
+    "fakeredis": "^2.0.0",
     "mocha": "^4.0.1",
     "mock-fs": "^4.4.2",
     "nock": "^9.1.5",

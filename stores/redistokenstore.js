@@ -1,8 +1,9 @@
-const Redis = require('ioredis');
+const redis = require('redis');
 
 class RedisTokenStore {
-  constructor(redisUrl, redis) {
-    this.redisClient = redis || new Redis(redisUrl);
+  constructor(redisUrl, redisClient) {
+    // Allow injecting redis client for testing & additional configuration
+    this.redisClient = redisClient || new redis.createClient(redisUrl);
   }
 
   async storeToken(key, value) {
