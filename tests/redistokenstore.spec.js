@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const client = require("fakeredis").createClient('fake_redis');
+const client = require('fakeredis').createClient('fake_redis');
 
 const RedisTokenStore = require('../stores/redistokenstore');
 

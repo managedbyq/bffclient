@@ -3,7 +3,7 @@ const redis = require('redis');
 class RedisTokenStore {
   constructor(redisUrl, redisClient) {
     // Allow injecting redis client for testing & additional configuration
-    this.redisClient = redisClient || new redis.createClient(redisUrl);
+    this.redisClient = redisClient || redis.createClient(redisUrl);
   }
 
   async storeToken(key, value) {
