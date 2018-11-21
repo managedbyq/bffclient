@@ -1,6 +1,6 @@
 {
   "name": "@mbq/bffclient",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Let's make it easy to connect a BFF with a service!",
   "main": "index.js",
   "scripts": {
