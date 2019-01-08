@@ -2,6 +2,7 @@
 version: 2
 jobs:
   build:
+    resource_class: small
     docker:
       - image: circleci/node:8.9.1
     steps:
@@ -18,6 +19,7 @@ jobs:
             npm run test
 
   deploy:
+    resource_class: small
     docker:
       - image: circleci/node:8.9.1
     steps:
